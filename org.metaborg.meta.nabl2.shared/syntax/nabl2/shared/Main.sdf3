@@ -1,0 +1,6 @@
+module nabl2/shared/Main
+
+imports
+
+  nabl2/shared/common/Main
+  nabl2/shared/constraints/Main

@@ -3,9 +3,12 @@ module pp
 imports
 
   libstratego-gpp
+  libspoofax/editor/refactoring/-
 
-  nabl2shared
+  nabl2/shared/pp
 
+  signatures/nabl2/lang/-
+  pp/nabl2/lang/-
   pp/-
 
 rules
@@ -16,3 +19,18 @@ rules
       ext      := <get-extension> path;
       filename := <guarantee-extension(|$[pp.[ext]])> path;
       result   := <pp-NaBL2-string> Module($[[name].pp],section*)
+
+rules
+
+  construct-textual-change =
+    construct-textual-change(pp-partial-NaBL2-string, parenthesize,
+        override-reconstruction, resugar)
+
+rules
+
+  // these need to be instantiated to make completion work correctly
+
+  pp-partial-NaBL2Lang-string = pp-partial-NaBL2-string
+  pp-partial-NaBL2Lang-string(|sort) = pp-partial-NaBL2-string(|sort)
+  
+  parenthesize-NaBL2 = parenthesize-NaBL2Lang

@@ -1,6 +1,0 @@
-module NaBL2Shared
-
-imports
-
-  nabl2/shared/common/Main
-  nabl2/shared/constraints/Main
