@@ -15,6 +15,7 @@ import org.metaborg.meta.nabl2.constraints.base.ImmutableCTrue;
 import org.metaborg.meta.nabl2.constraints.messages.IMessageContent;
 import org.metaborg.meta.nabl2.constraints.messages.IMessageInfo;
 import org.metaborg.meta.nabl2.constraints.messages.MessageContent;
+import org.metaborg.meta.nabl2.scopegraph.IOccurrence;
 import org.metaborg.meta.nabl2.scopegraph.terms.Scope;
 import org.metaborg.meta.nabl2.solver.components.AstSolver;
 import org.metaborg.meta.nabl2.solver.components.BaseSolver;
@@ -48,7 +49,7 @@ public class Solver {
     private final SolverConfig config;
     final SolverMode mode;
     final Function1<String, ITermVar> fresh;
-    final Unifier<IConstraint> unifier;
+    final Unifier<IConstraint, IOccurrence> unifier;
     final ICancel cancel;
     final IProgress progress;
     final NaBL2DebugConfig debugConfig;
@@ -83,14 +84,15 @@ public class Solver {
         this.components.add(relationSolver = new RelationSolver(this, config.getRelations(), config.getFunctions()));
         this.components.add(setSolver = new SetSolver(this, namebindingSolver.nameSets()));
         this.components.add(symbolicSolver = new SymbolicSolver(this));
-        this.components.add(polySolver = new PolymorphismSolver(this));
+        this.components.add(polySolver = new PolymorphismSolver(this, namebindingSolver::arePropsDone,
+                namebindingSolver::getDeclProperty, namebindingSolver::setDeclProperty));
 
         this.messages = new Messages();
     }
 
     // --- solver life cycle ---
 
-    private void addAll(Collection<PartialSolution> partialSolutions, IMessageInfo protoMessage)
+    private void addAll(Collection<? extends PartialSolution> partialSolutions, IMessageInfo protoMessage)
             throws InterruptedException {
         for(PartialSolution partialSolution : partialSolutions) {
             if(!partialSolution.getConfig().equals(config)) {
@@ -217,7 +219,7 @@ public class Solver {
     }
 
     public static Solution solveFinal(SolverConfig config, Function1<String, ITermVar> fresh,
-            Collection<IConstraint> constraints, Collection<PartialSolution> partialSolutions, IMessageInfo messageInfo,
+            Collection<IConstraint> constraints, Collection<? extends PartialSolution> partialSolutions, IMessageInfo messageInfo,
             IProgress progress, ICancel cancel, NaBL2DebugConfig debugConfig)
             throws SolverException, InterruptedException {
         final int n = constraints.size() + partialSolutions.stream().map(PartialSolution::getResidualConstraints)
