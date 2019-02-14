@@ -94,6 +94,7 @@ public class FastNameResolution<V, L, R> implements INameResolution<V, L, R> {
         }
         final Set.Transient<IResolutionPath<V, L, R>> env = Set.Transient.of();
         if(relation.isPresent()) {
+          //TODO Taico path.getTarget().getOwner().getScopeGraph()
             for(List<V> datum : scopeGraph.getData().get(path.getTarget(), relation.get())) {
                 if(dataWF.wf(datum) && notShadowed(datum, specifics)) {
                     env.__insert(Paths.resolve(path, relation, datum));
@@ -128,6 +129,7 @@ public class FastNameResolution<V, L, R> implements INameResolution<V, L, R> {
             throw new IncompleteEdgeException(path.getTarget(), l);
         }
         final Set.Transient<IResolutionPath<V, L, R>> env = Set.Transient.of();
+        //TODO Taico path.getTarget().getOwner().getScopeGraph()
         for(V nextScope : scopeGraph.getEdges().get(path.getTarget(), l)) {
             final Optional<IScopePath<V, L>> p = Paths.append(path, Paths.edge(path.getTarget(), l, nextScope));
             if(p.isPresent()) {
