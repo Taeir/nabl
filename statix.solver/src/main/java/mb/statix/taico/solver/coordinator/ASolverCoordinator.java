@@ -308,8 +308,16 @@ public abstract class ASolverCoordinator implements ISolverCoordinator {
             errors.addAll(result.getValue().errors());
             delays.putAll(result.getValue().delays());
         }
+        
+        //TODO Use a fake top state instead of the root state?
         return MSolverResult.of(getRootState(), errors, delays, existentials);
     }
+    
+//    protected IMState fakeTopState() {
+//        //TODO This should not be necessary
+//        //TODO Create a fake unifier of all the other unifiers combined
+//        
+//    }
     
     // --------------------------------------------------------------------------------------------
     // Other

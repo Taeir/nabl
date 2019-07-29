@@ -1,5 +1,6 @@
 package mb.statix.taico.incremental.strategy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.metaborg.util.functions.Function1;
 
@@ -17,6 +19,8 @@ import mb.nabl2.terms.matching.TermMatch.IMatcher;
 import mb.statix.constraints.CUser;
 import mb.statix.scopegraph.terms.Scope;
 import mb.statix.solver.IConstraint;
+import mb.statix.taico.dependencies.DependencyManager;
+import mb.statix.taico.dependencies.NameDependencies;
 import mb.statix.taico.incremental.changeset.IChangeSet;
 import mb.statix.taico.incremental.manager.IncrementalManager;
 import mb.statix.taico.module.IModule;
@@ -79,6 +83,7 @@ public abstract class IncrementalStrategy {
      * @throws ModuleDelayException
      *      If the child access needs to be delayed.
      */
+    @Deprecated
     public abstract IModule getChildModule(SolverContext context, SolverContext oldContext,
             IModule requester, String childId) throws ModuleDelayException;
     
@@ -102,6 +107,7 @@ public abstract class IncrementalStrategy {
      * @throws ModuleDelayException
      *      If the access is not allowed (yet) in the current context phase.
      */
+    @Deprecated
     public abstract IModule getModule(SolverContext context, SolverContext oldContext,
             String requesterId, String id) throws ModuleDelayException;
     
@@ -267,6 +273,11 @@ public abstract class IncrementalStrategy {
         return new IncrementalManager();
     }
     
+    @SuppressWarnings("unchecked")
+    public DependencyManager<?> createDependencyManager() {
+        return new DependencyManager<>((Supplier<NameDependencies> & Serializable) NameDependencies::new);
+    }
+    
     //---------------------------------------------------------------------------------------------
     
     /**
@@ -276,13 +287,16 @@ public abstract class IncrementalStrategy {
     public static IMatcher<IncrementalStrategy> matcher() {
         Function<String, IncrementalStrategy> f = s -> {
             switch (s) {
-                case "default":
+                
                 case "baseline":
                     return new BaselineIncrementalStrategy();
                 case "query":
                     return new QueryIncrementalStrategy();
                 case "name":
                     return new NameIncrementalStrategy();
+                case "default":
+                case "combined":
+                    return new CombinedStrategy();
                 //TODO Add more strategies here
                 default:
                     return null;
